@@ -79,11 +79,11 @@ class TrainDP3Workspace:
             cfg.training.checkpoint_every = 1
             cfg.training.val_every = 1
             cfg.training.sample_every = 1
-            RUN_ROLLOUT = True
+            RUN_ROLLOUT = False
             RUN_CKPT = False
             verbose = True
         else:
-            RUN_ROLLOUT = True
+            RUN_ROLLOUT = False
             RUN_CKPT = True
             verbose = False
         
@@ -134,9 +134,19 @@ class TrainDP3Workspace:
 
         # configure env
         env_runner: BaseRunner
-        env_runner = hydra.utils.instantiate(
-            cfg.task.env_runner,
-            output_dir=self.output_dir)
+        if cfg.task == "rlbench_open_door":
+            env_runner = hydra.utils.instantiate(
+                cfg.task.env_runner,
+                output_dir=self.output_dir,
+                state=cfg.state,  
+                action=cfg.action,
+                pcd=cfg.pcd
+            )
+        else:
+            env_runner = hydra.utils.instantiate(
+                cfg.task.env_runner,
+                output_dir=self.output_dir
+            )
 
         if env_runner is not None:
             assert isinstance(env_runner, BaseRunner)
@@ -345,9 +355,22 @@ class TrainDP3Workspace:
         
         # configure env
         env_runner: BaseRunner
-        env_runner = hydra.utils.instantiate(
-            cfg.task.env_runner,
-            output_dir=self.output_dir)
+        print("cfg.task:", cfg.task, "type:", type(cfg.task))
+
+        if cfg.task['name']  == "rlbench_open_door":
+        # if cfg.task == "rlbench_open_door":
+            env_runner = hydra.utils.instantiate(
+                cfg.task.env_runner,
+                output_dir=self.output_dir,
+                state=cfg.state,  
+                action=cfg.action,
+                pcd=cfg.pcd
+            )
+        else:
+            env_runner = hydra.utils.instantiate(
+                cfg.task.env_runner,
+                output_dir=self.output_dir
+            )
         assert isinstance(env_runner, BaseRunner)
         policy = self.model
         if cfg.training.use_ema:

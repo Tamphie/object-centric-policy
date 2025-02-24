@@ -184,8 +184,23 @@ class DP3(BasePolicy):
         # this_n_point_cloud = nobs['imagin_robot'][..., :3] # only use coordinate
         if not self.use_pc_color:
             nobs['point_cloud'] = nobs['point_cloud'][..., :3]
+            print(f"After normalization, point cloud shape: {nobs['point_cloud'].shape}")
+        if len(nobs['point_cloud'].shape) == 3:  
+            nobs['point_cloud'] = nobs['point_cloud'].unsqueeze(1)  # Add time dim → (B, 1, N, 3)
+            print(f"Dim Fixed point cloud shape: {nobs['point_cloud'].shape}")
+            if nobs['point_cloud'].shape[1] != self.n_obs_steps:
+                nobs['point_cloud'] = nobs['point_cloud'].repeat(1, self.n_obs_steps, 1, 1)
+                print(f"Time Fixed point cloud shape: {nobs['point_cloud'].shape}")
         this_n_point_cloud = nobs['point_cloud']
         
+        if 'agent_pos' in nobs:
+            
+            if len(nobs['agent_pos'].shape) == 4:
+                nobs['agent_pos'] = nobs['agent_pos'].squeeze(1)
+            print(f"Agent position shape before processing: {nobs['agent_pos'].shape}")
+            if nobs['agent_pos'].shape[1] != self.n_obs_steps:
+                nobs['agent_pos'] = nobs['agent_pos'].repeat(1, self.n_obs_steps, 1)  # (B, 1, F) → (B, 2, F)
+            print(f"Agent position shape after processing: {nobs['agent_pos'].shape}")
         
         value = next(iter(nobs.values()))
         B, To = value.shape[:2]
@@ -203,7 +218,13 @@ class DP3(BasePolicy):
         global_cond = None
         if self.obs_as_global_cond:
             # condition through global feature
+            print(f"shape of To:{To}")
             this_nobs = dict_apply(nobs, lambda x: x[:,:To,...].reshape(-1,*x.shape[2:]))
+            print(f"Shape of nobs['agent_pos'] before reshape: {nobs['agent_pos'].shape}")
+            print(f"Shape of nobs['point_cloud'] before reshape: {nobs['point_cloud'].shape}")
+            print(f"Shape of this_nobs['point_cloud'] after reshape: {this_nobs['point_cloud'].shape}")
+            print(f"Shape of this_nobs['agent_pos'] after reshape: {this_nobs['agent_pos'].shape}")
+
             nobs_features = self.obs_encoder(this_nobs)
             if "cross_attention" in self.condition_type:
                 # treat as a sequence

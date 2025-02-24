@@ -221,7 +221,19 @@ class ReplayBuffer:
         if backend == 'numpy':
             print('backend argument is deprecated!')
             store = None
-        group = zarr.open(os.path.expanduser(zarr_path), 'r')
+        print(f"path: {os.path.expanduser(zarr_path)}")
+        # group = zarr.open(os.path.expanduser(zarr_path), 'r')
+        path = '/home/tongmiao/3D-Diffusion-Policy/3D-Diffusion-Policy/data/rlbench_open_door_expert.zarr'
+        if os.path.exists(path):
+            print(f"数据集路径存在: {path}")
+        else:
+            print(f"错误！数据集路径不存在: {path}")
+            exit()  # 直接终止程序，防止后续出错
+        print(f"🔍 Current working directory: {os.getcwd()}")
+
+        group = zarr.open(os.path.expanduser(path), 'r')
+        for key in group.keys():
+            print(f"🔑 Key: {key}")
         return cls.copy_from_store(src_store=group.store, store=store, 
             keys=keys, chunks=chunks, compressors=compressors, 
             if_exists=if_exists, **kwargs)

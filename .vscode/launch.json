@@ -1,0 +1,86 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Train.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/3D-Diffusion-Policy/train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "HYDRA_FULL_ERROR": "1",
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args": [
+                "--config-name=dp3.yaml",
+                "task=rlbench_open_door",
+                "hydra.run.dir=data/outputs/rlbench_open_door-dp3-0322_seed1",
+                "training.debug=False",
+                "training.seed=1",
+                "training.device=cuda:0",
+                "exp_name=rlbench_open_door-dp3-0322",
+                "logging.mode=online",
+                "checkpoint.save_ckpt=True",
+                "state=gripper_states",
+                "action=joint_positions",
+                "pcd=front_pcd"
+            ],
+            // "cwd": "${workspaceFolder}/3D-Diffusion-Policy"
+        }
+        ,
+        {
+            "name": "Debug Eval_seed0.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/3D-Diffusion-Policy/eval.py",
+            "console": "integratedTerminal",
+            "env": {
+                "HYDRA_FULL_ERROR": "1",
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args": [
+                "--config-name=dp3.yaml",
+                "task=rlbench_open_door",
+                "hydra.run.dir=data/outputs/rlbench_open_door-dp3-0322_seed0",
+                "training.debug=False",
+                "training.seed=0",
+                "training.device=cuda:0",
+                "exp_name=rlbench_open_door-dp3-0322",
+                "logging.mode=online",
+                "checkpoint.save_ckpt=True",
+                "state=joint_positions",
+                "action=gripper_states",
+                "pcd=pcd_from_mesh"
+            ],
+            // "cwd": "${workspaceFolder}/3D-Diffusion-Policy"
+        }
+        ,
+        {
+            "name": "Debug Eval_seed1.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/3D-Diffusion-Policy/eval.py",
+            "console": "integratedTerminal",
+            "env": {
+                "HYDRA_FULL_ERROR": "1",
+                "CUDA_VISIBLE_DEVICES": "0"
+            },
+            "args": [
+                "--config-name=dp3.yaml",
+                "task=rlbench_open_door",
+                "hydra.run.dir=data/outputs/rlbench_open_door-dp3-0322_seed1",
+                "training.debug=False",
+                "training.seed=1",
+                "training.device=cuda:0",
+                "exp_name=rlbench_open_door-dp3-0322",
+                "logging.mode=online",
+                "checkpoint.save_ckpt=True",
+                "state=gripper_states",
+                "action=joint_positions",
+                "pcd=front_pcd"
+            ],
+            // "cwd": "${workspaceFolder}/3D-Diffusion-Policy"
+        }
+
+    ]
+}

@@ -22,11 +22,21 @@ class SimpleVideoRecordingWrapper(gym.Wrapper):
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
         self.frames = list()
+        # print(f"🔍 Debug: self.env = {self.env}")
+        # print(f"🔍 Debug: Type of self.env = {type(self.env)}")
+        # print(f"🔍 Debug: Available methods in self.env = {dir(self.env)}")
 
-        frame = self.env.render(mode=self.mode)
-        assert frame.dtype == np.uint8
+        # # Check if render() exists and what it accepts
+        # if hasattr(self.env, "render"):
+        #     import inspect
+        #     print(f"🔍 Debug: render() signature = {inspect.signature(self.env.render)}")
+        # else:
+        #     print("❌ self.env does NOT have a render() method!")
+        # frame = self.env.render(mode=self.mode)
+        frame = self.env.render()
+        if frame: 
+            assert frame.dtype == np.uint8
         self.frames.append(frame)
-        
         self.step_count = 1
         return obs
     
@@ -34,8 +44,10 @@ class SimpleVideoRecordingWrapper(gym.Wrapper):
         result = super().step(action)
         self.step_count += 1
         
-        frame = self.env.render(mode=self.mode)
-        assert frame.dtype == np.uint8
+        # frame = self.env.render(mode=self.mode)
+        frame = self.env.render()
+        if frame: 
+            assert frame.dtype == np.uint8
         self.frames.append(frame)
         
         return result

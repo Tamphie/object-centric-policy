@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -262,6 +263,9 @@ class DP3Encoder(nn.Module):
 
     def forward(self, observations: Dict) -> torch.Tensor:
         points = observations[self.point_cloud_key]
+        if len(points.shape) == 4:
+            B, H, W, C = points.shape  # Automatically get dimensions
+            points = points.reshape(B, H * W, C)
         assert len(points.shape) == 3, cprint(f"point cloud shape: {points.shape}, length should be 3", "red")
         if self.use_imagined_robot:
             img_points = observations[self.imagination_key][..., :points.shape[-1]] # align the last dim
@@ -272,7 +276,12 @@ class DP3Encoder(nn.Module):
         pn_feat = self.extractor(points)    # B * out_channel
             
         state = observations[self.state_key]
+        print("state shape:", state.shape)
         state_feat = self.state_mlp(state)  # B * 64
+        if len(state_feat.shape) == 3:  # 1* B * 64 -> B * 64
+            state_feat = state_feat.squeeze(0)  
+        print("state_feat shape:", state_feat.shape)
+        print("pn_feat shape:", pn_feat.shape)
         final_feat = torch.cat([pn_feat, state_feat], dim=-1)
         return final_feat
 

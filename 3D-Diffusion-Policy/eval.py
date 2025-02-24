@@ -24,6 +24,10 @@ OmegaConf.register_new_resolver("eval", eval, replace=True)
         'diffusion_policy_3d', 'config'))
 )
 def main(cfg):
+    state = cfg.get("state", "gripper_states")
+    action = cfg.get("action", "joint_positions")
+    pcd = cfg.get("pcd","front_pcd")
+    print(f"Eval using State: {state}, Action: {action}, Point: {pcd}")
     workspace = TrainDP3Workspace(cfg)
     workspace.eval()
 

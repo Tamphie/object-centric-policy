@@ -22,7 +22,11 @@ class TopKCheckpointManager:
     def get_ckpt_path(self, data: Dict[str, float]) -> Optional[str]:
         if self.k == 0:
             return None
-
+        
+        if self.monitor_key not in data:
+            print(f"Warning: '{self.monitor_key}' not found in checkpoint data. Available keys: {list(data.keys())}")
+            return None  # Prevent crashing
+        
         value = data[self.monitor_key]
         ckpt_path = os.path.join(
             self.save_dir, self.format_str.format(**data))

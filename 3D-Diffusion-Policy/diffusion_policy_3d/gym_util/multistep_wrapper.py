@@ -1,5 +1,6 @@
 import gym
 from gym import spaces
+import gymnasium
 import numpy as np
 import torch
 from collections import defaultdict, deque
@@ -18,9 +19,9 @@ def repeated_box(box_space, n):
     )
 
 def repeated_space(space, n):
-    if isinstance(space, spaces.Box):
+    if isinstance(space, (spaces.Box,gymnasium.spaces.Box)):
         return repeated_box(space, n)
-    elif isinstance(space, spaces.Dict):
+    elif isinstance(space, (spaces.Dict,gymnasium.spaces.Dict)):
         result_space = spaces.Dict()
         for key, value in space.items():
             result_space[key] = repeated_space(value, n)
@@ -142,7 +143,15 @@ class MultiStepWrapper(gym.Wrapper):
             if len(self.done) > 0 and self.done[-1]:
                 # termination
                 break
-            observation, reward, done, info = super().step(act)
+            # observation, reward, done, info = super().step(act)
+            step_result = super().step(act)
+            if len(step_result) == 4:
+                # Old Gym API: (observation, reward, done, info)
+                observation, reward, done, info = step_result
+            elif len(step_result) == 5:
+                # New Gymnasium API: (observation, reward, terminated, truncated, info)
+                observation, reward, terminated, truncated, info = step_result
+                done = terminated or truncated
 
             self.obs.append(observation)
             self.reward.append(reward)
@@ -168,11 +177,15 @@ class MultiStepWrapper(gym.Wrapper):
             return stack_last_n_obs(self.obs, n_steps)
         elif isinstance(self.observation_space, spaces.Dict):
             result = dict()
+           
+
             for key in self.observation_space.keys():
                 result[key] = stack_last_n_obs(
-                    [obs[key] for obs in self.obs],
+                    # [obs[key] for obs in self.obs],
+                    [obs[0][key] if isinstance(obs, tuple) else obs[key] for obs in self.obs],
                     n_steps
                 )
+                print(f"   ✅ Stacked result for {key} = {result[key].shape}, values = {result[key]}")
             return result
         else:
             raise RuntimeError('Unsupported space type')

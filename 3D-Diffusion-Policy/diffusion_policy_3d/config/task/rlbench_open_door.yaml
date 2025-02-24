@@ -1,0 +1,49 @@
+name: rlbench_open_door
+
+task_name: open_door
+
+shape_meta: &shape_meta
+  # Define observation modalities
+  obs:
+    point_cloud:
+      shape: [16384, 3]  # Point cloud data from RLBench (downsampled)
+      type: point_cloud
+    agent_pos:
+      shape: [8]  # Gripper pose (x, y, z, quaternion)
+      type: low_dim
+    # joint_positions:
+    #   shape: [7]  # Robot joint angles
+    #   type: low_dim
+    # joint_velocities:
+    #   shape: [7]  # Joint velocities
+    #   type: low_dim
+    # image:
+    #   shape: [84, 84, 3]  # RGB image from RLBench
+    #   type: rgb
+  action:
+    shape: [8]  # Robot joint commands
+
+env_runner:
+  _target_: diffusion_policy_3d.env_runner.rlbench_runner.RlbenchRunner
+  eval_episodes: 20
+  max_steps: 300  # RLBench episode length
+  n_obs_steps: ${n_obs_steps}
+  n_action_steps: ${n_action_steps}
+  fps: 10
+  task_name: open_door
+  render_size: 84
+  use_point_crop: ${policy.use_point_crop}
+  
+
+dataset:
+  _target_: diffusion_policy_3d.dataset.rlbench_dataset.RlbenchDataset
+  zarr_path: data/rlbench_open_door_expert.zarr  # Store dataset in Zarr format
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  seed: 42
+  val_ratio: 0.02
+  max_train_episodes: 90
+  # use_rgb: True  # Use image-based observations
+  # use_point_cloud: True  # Use 3D point cloud observations
+  # use_joint_states: True  # Include joint position & velocity data
