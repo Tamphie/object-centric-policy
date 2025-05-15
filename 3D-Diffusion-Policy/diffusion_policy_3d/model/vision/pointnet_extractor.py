@@ -271,7 +271,7 @@ class DP3Encoder(nn.Module):
             img_points = observations[self.imagination_key][..., :points.shape[-1]] # align the last dim
             points = torch.concat([points, img_points], dim=1)
         
-        # points = torch.transpose(points, 1, 2)   # B * 3 * N
+        # points = torch.transpose(points, 1, 2)   # B * N * 3
         # points: B * 3 * (N + sum(Ni))
         pn_feat = self.extractor(points)    # B * out_channel
             
